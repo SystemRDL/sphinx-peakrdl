@@ -26,4 +26,4 @@ importers: List["ImporterPlugin"]
 # This is a hack to satisfy calling requirements of importer plugins
 argparse_options: "Namespace"
 
-top_node: Optional["AddrmapNode"] = None
+root_node: Optional["AddrmapNode"] = None

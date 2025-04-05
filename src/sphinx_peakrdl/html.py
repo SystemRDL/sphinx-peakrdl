@@ -19,7 +19,7 @@ def write_html_callback(app: "Sphinx") -> None:
 
     Export HTML
     """
-    if DS.top_node is None:
+    if DS.root_node is None:
         return []
 
     e = HTMLExporter(
@@ -27,13 +27,13 @@ def write_html_callback(app: "Sphinx") -> None:
     )
 
     if app.config.peakrdl_title is None:
-        title = f"{DS.top_node.inst_name} Register Reference"
+        title = f"{DS.root_node.top.inst_name} Register Reference"
     else:
         title = app.config.peakrdl_title
 
     with progress_message("Writing PeakRDL HTML"):
         e.export(
-            DS.top_node,
+            DS.root_node,
             os.path.join(app.builder.outdir, HTML_ROOT),
             title=title,
             home_url=app.builder.get_relative_uri(HTML_INDEX, app.config.root_doc)

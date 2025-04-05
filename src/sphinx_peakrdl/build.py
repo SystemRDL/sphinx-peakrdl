@@ -46,7 +46,7 @@ def compile_input_callback(app: "Sphinx", env: "BuildEnvironment", docnames: Lis
                 inst_name=None,
                 parameters=app.config.peakrdl_parameters,
             )
-            DS.top_node = root.top
+            DS.root_node = root
         except RDLCompileError as e:
             log.error("Failed to elaborate PeakRDL design")
             raise e

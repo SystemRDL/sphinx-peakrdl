@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Sequence
 
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util import logging
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-class RDLRelativeTo(SphinxDirective):
+class RDLRelativeToDirective(SphinxDirective):
     """
     This directive sets the relative search scope of an RDL node
     """
@@ -20,16 +20,16 @@ class RDLRelativeTo(SphinxDirective):
     optional_arguments = 0
     final_argument_whitespace = False
 
-    def run(self) -> List["Node"]:
+    def run(self) -> Sequence["Node"]:
         path = self.arguments[0].strip()
         if path == "None":
             path = None
 
         # Validate that the path exists
-        if DS.top_node is None:
+        if DS.root_node is None:
             return []
         try:
-            node = DS.top_node.find_by_path(path)
+            node = DS.root_node.find_by_path(path)
         except (ValueError, IndexError):
             node = None
 
