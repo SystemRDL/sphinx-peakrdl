@@ -9,7 +9,9 @@ requires-python = ">=3.7"
 dependencies = [
     "systemrdl-compiler >= 1.29.0",
     "peakrdl-cli >= 1.3.0",
+    "peakrdl-html",
     "sphinx >= 1.8",
+    "myst-parser >= 1.0",
 ]
 
 authors = [
@@ -39,7 +41,7 @@ classifiers = [
 Source = "https://github.com/SystemRDL/sphinx-peakrdl"
 Tracker = "https://github.com/SystemRDL/sphinx-peakrdl/issues"
 Changelog = "https://github.com/SystemRDL/sphinx-peakrdl/releases"
-#Documentation = "https://sphinx-peakrdl.readthedocs.io/"
+Documentation = "https://sphinx-peakrdl.readthedocs.io/"
 
 [tool.setuptools.dynamic]
 version = {attr = "sphinx_peakrdl.__about__.__version__"}

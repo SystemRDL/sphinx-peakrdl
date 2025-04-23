@@ -6,8 +6,11 @@ from sphinx import addnodes
 from docutils import nodes
 from systemrdl.node import Node, RegNode, AddressableNode, SignalNode, RootNode
 from systemrdl.rdltypes.references import PropertyReference
+from systemrdl.source_ref import FileSourceRef, DetailedFileSourceRef
 
 from ..utils import lookup_rdl_node, FieldList, Table
+
+from .. import markdown
 
 
 logger = logging.getLogger(__name__)
@@ -52,6 +55,27 @@ class RDLDocNodeDirective(SphinxDirective):
         xref += nodes.inline(text=text, classes=["xref"])
         return xref
 
+    def get_desc_as_docutils(self, rdl_node: Node) -> nodes.paragraph:
+        desc = rdl_node.get_property("desc") or ""
+
+        src_ref = rdl_node.inst.property_src_ref.get("desc", rdl_node.inst.inst_src_ref)
+        if isinstance(src_ref, FileSourceRef):
+            path = src_ref.path
+        else:
+            path = "UNKNOWN"
+
+        # TODO: Computing the line number for EVERY src ref may be time consuming
+        if isinstance(src_ref, DetailedFileSourceRef):
+            line = src_ref.line
+        else:
+            line = 0
+
+        desc_nodes = markdown.render_to_docutils(desc, path, line)
+
+        p = nodes.paragraph()
+        p.extend(desc_nodes)
+        return p
+
 
     def make_rdl_node_doc(self, rdl_node: Node) -> Sequence[nodes.Node]:
         if isinstance(rdl_node, RegNode):
@@ -79,6 +103,9 @@ class RDLDocNodeDirective(SphinxDirective):
         if rdl_node.array_dimensions:
             fl.add_row("Array Dimensions", f"[{']['.join(rdl_node.array_dimensions)}]")
             fl.add_row("Array Stride", f"{rdl_node.array_stride:#x}")
+
+        # Description
+        desc_paragraph = self.get_desc_as_docutils(rdl_node)
 
         # Field Table
         table = Table(["Bits", "Identifier", "Access", "Reset"])
@@ -116,12 +143,30 @@ class RDLDocNodeDirective(SphinxDirective):
                 reset,
             ])
 
-        return [fl.as_node(), table.as_node()]
+        # Field descriptions
+        def_list = nodes.definition_list()
+        for field in reversed(rdl_node.fields()):
+            desc = field.get_property("desc")
+            if not desc:
+                continue
+
+            dli = nodes.definition_list_item()
+            def_list.append(dli)
+
+            dl_term = nodes.term(text = field.inst_name)
+            dl_def = nodes.definition()
+            dl_def_p = self.get_desc_as_docutils(field)
+            dl_def.append(dl_def_p)
+
+            dli.append(dl_term)
+            dli.append(dl_def)
+
+
+
+        return [fl.as_node(), desc_paragraph, table.as_node(), def_list]
 
 
     def make_rdl_grouplike_doc(self, rdl_node: AddressableNode) -> Sequence[nodes.Node]:
-        # TODO: Add description somehow
-
         # Info Field List Header
         fl = FieldList()
         fl.add_row("Instance", rdl_node.inst_name)
@@ -129,8 +174,11 @@ class RDLDocNodeDirective(SphinxDirective):
             fl.add_row("Parent", self.make_rdl_node_xref(rdl_node.parent))
             fl.add_row("Base Offset", f"{rdl_node.raw_address_offset:#x}")
         if rdl_node.array_dimensions:
-            fl.add_row("Array Dimensions", f"[{']['.join(rdl_node.array_dimensions)}]")
+            # FIXME: cant join ints: fl.add_row("Array Dimensions", f"[{']['.join(rdl_node.array_dimensions)}]")
             fl.add_row("Array Stride", f"{rdl_node.array_stride:#x}")
+
+        # Description
+        desc_paragraph = self.get_desc_as_docutils(rdl_node)
 
         # Child table
         table = Table(["Offset", "Identifier"])
@@ -141,7 +189,8 @@ class RDLDocNodeDirective(SphinxDirective):
             offset = f"{child.raw_address_offset:#x}"
 
             if child.array_dimensions:
-                text = child.inst_name + f"[{']['.join(child.array_dimensions)}]"
+                # FIXME: cant join ints: text = child.inst_name + f"[{']['.join(child.array_dimensions)}]"
+                text = child.inst_name
                 identifier = self.make_rdl_node_xref(child, text)
             else:
                 identifier = self.make_rdl_node_xref(child)
@@ -151,8 +200,4 @@ class RDLDocNodeDirective(SphinxDirective):
                 identifier,
             ])
 
-        c = nodes.compound()
-        c += fl.as_node()
-        c += table.as_node()
-
-        return [c]
+        return [fl.as_node(), desc_paragraph, table.as_node()]

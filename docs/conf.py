@@ -14,13 +14,15 @@ author = 'Alex Mykyta'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    "sphinx_peakrdl"
+    "sphinx.ext.todo",
+    "sphinx_peakrdl",
 ]
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-
+todo_include_todos = True
+todo_emit_warnings = True
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -32,5 +34,5 @@ html_static_path = []
 
 
 peakrdl_input_files = [
-    "atxmega_spi.rdl"
+    "rdl_src/turboencabulator.rdl"
 ]

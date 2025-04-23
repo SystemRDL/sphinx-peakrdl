@@ -14,7 +14,7 @@ class RDLRefRole(XRefRole):
         refnode["rdl:relative-to"] = env.ref_context.get("rdl:relative-to")
 
         if not has_explicit_title:
-            # target is title. Format it accordingly
+            # Derive title from target
             title = target
             if title.startswith("~"):
                 # First character is tilde. Only show the leaf node in the title
@@ -22,8 +22,15 @@ class RDLRefRole(XRefRole):
                 didx = title.rfind(".")
                 if didx != -1:
                     title = title[didx + 1:]
+            else:
+                # Otherwise, truncate title if there is a | separator
+                didx = title.rfind("|")
+                if didx != -1:
+                    title = title[didx + 1:]
+
 
         target = target.lstrip("~")
+        target = target.replace("|", "")
 
         return title, target
 
