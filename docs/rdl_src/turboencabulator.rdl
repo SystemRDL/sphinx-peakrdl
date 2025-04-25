@@ -26,13 +26,13 @@ addrmap turbo_encab {
     reg {
         name = "System Control Register";
         desc = "
-        !!! other
+        !!! tip
             This page demonstrates the use of the Markdown Math plugin to insert
             LaTeX-style equations that are rendered using MathJax.
 
-            For inline math, use `\\(...\\)`.
+            For inline math, use `$...$`.
 
-            For standalone math blocks, use `$$...$$`, `\\[...\\]` or `\\begin...\\end`.
+            For standalone math blocks, use `$$...$$`.
 
             Reminder: In RDL strings, backslashes need to be escaped.
 
@@ -60,7 +60,7 @@ addrmap turbo_encab {
             desc = "
             Capacitive diractance relative to the lunar waneshaft.
 
-            The amount of energy that can be stored in a capacitor is \\(E = \\frac{1}{2} CV^2\\),
+            The amount of energy that can be stored in a capacitor is $E = \\frac{1}{2} CV^2$,
             but that is irrelevant because nobody knows what 'diractance' is, so we'll leave
             that as an exercise to the reader.
             ";
@@ -110,7 +110,7 @@ addrmap turbo_encab {
         reg {
             field {sw=rw; hw=r;} sync_en;
             field {sw=rw; hw=r;} disable;
-        } control;
+        } control[5];
 
         reg {
             field {
@@ -158,5 +158,6 @@ addrmap turbo_encab {
                 sw=r; hw=w;
             } value[31:0];
         } meter;
-    } grammeter[12] @ 0x1000 += 0x200;
+    } grammeter[12][11][10] @ 0x1000 += 0x200;
+    //} grammeter @ 0x1000;
 };

@@ -32,7 +32,6 @@ todo_emit_warnings = True
 html_theme = "sphinx_book_theme"
 html_static_path = []
 
-
 peakrdl_input_files = [
     "rdl_src/turboencabulator.rdl"
 ]

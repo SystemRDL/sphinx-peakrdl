@@ -117,6 +117,20 @@ class Table:
         table += tgroup
         return table
 
+def alpha_from_int(n: int) -> str:
+    """
+    Converts integers to "excel-like" alpha sequences
+    """
+    s = ""
+    while True:
+        digit_idx = n % 26
+        s = chr(ord("A") + digit_idx) + s
+        n = n // 26
+        if n == 0:
+            break
+        n -= 1
+    return s
+
 
 __all__ = [
     "status_iterator",
@@ -124,4 +138,5 @@ __all__ = [
     "lookup_rdl_node",
     "FieldList",
     "Table",
+    "alpha_from_int",
 ]
