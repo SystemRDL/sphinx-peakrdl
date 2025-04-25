@@ -1,0 +1,108 @@
+name: build
+
+on:
+  push:
+    branches:
+      - main
+      - 'dev/**'
+  pull_request:
+    branches: [ main ]
+  release:
+    types:
+      - published
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        python-version:
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+        include:
+          - os: ubuntu-latest
+
+          # older versions need older OS
+          - python-version: "3.7"
+            os: ubuntu-22.04
+
+          - python-version: "3.8"
+            os: ubuntu-22.04
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -r docs/requirements.txt
+
+      - name: Install
+        run: |
+          python -m pip install "."
+
+      - name: Test
+        run: |
+          cd docs
+          make clean html
+
+#-------------------------------------------------------------------------------
+  build:
+    needs:
+      - test
+    name: Build distributions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        name: Install Python
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install build
+
+      - name: Build sdist
+        run: python -m build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: |
+            dist/*.tar.gz
+            dist/*.whl
+
+#-------------------------------------------------------------------------------
+  deploy:
+    needs:
+      - build
+
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write
+
+    # Only publish when a GitHub Release is created.
+    if: github.event_name == 'release'
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - uses: pypa/gh-action-pypi-publish@release/v1

@@ -94,23 +94,12 @@ addrmap turbo_encab {
         - Automatically synchronizing.
         - Fully independent of the five dingle arms.
         - Produces reliable entropic measurements.
-
-        !!! tip
-            This page represents an array of regfile components.
-            The current page represents the grammeter[index] instance, but can be
-            changed by clicking on the array index of the crumbtrail above.
-
-            Notice that when the array index is changed:
-
-            - Absolute address is re-calculated
-            - URL crumbtrail is updated
-            - RDLFormatCode [lb]index[rb] tags are updated
         ";
 
         reg {
             field {sw=rw; hw=r;} sync_en;
             field {sw=rw; hw=r;} disable;
-        } control[5];
+        } control;
 
         reg {
             field {
@@ -158,6 +147,5 @@ addrmap turbo_encab {
                 sw=r; hw=w;
             } value[31:0];
         } meter;
-    } grammeter[12][11][10] @ 0x1000 += 0x200;
-    //} grammeter @ 0x1000;
+    } grammeter[12] @ 0x1000 += 0x200;
 };

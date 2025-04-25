@@ -30,7 +30,7 @@ class RDLDocNodeDirective(SphinxDirective):
 
 
     option_spec = {
-        "add-heading": directives.flag, "no-heading": directives.flag,
+        "wrap-section": directives.flag, "no-wrap-section": directives.flag,
         "link-to": link_to_option,
     }
 
@@ -44,12 +44,12 @@ class RDLDocNodeDirective(SphinxDirective):
 
     def run(self) -> Sequence[nodes.Node]:
         # Resolve options
-        if "no-heading" in self.options:
-            self.options["add-heading"] = False
-        elif "add-heading" in self.options:
-            self.options["add-heading"] = True
+        if "no-wrap-section" in self.options:
+            self.options["wrap-section"] = False
+        elif "wrap-section" in self.options:
+            self.options["wrap-section"] = True
         else:
-            self.options["add-heading"] = self.config.peakrdl_doc_add_heading
+            self.options["wrap-section"] = self.config.peakrdl_doc_wrap_section
 
         # Try to lookup node
         relative_to_path: Optional[str] = self.env.ref_context.get("rdl:relative-to")
@@ -196,10 +196,11 @@ class RDLDocNodeDirective(SphinxDirective):
             )
             return []
 
-        if self.options["add-heading"]:
+        if self.options["wrap-section"]:
             ref_id = rdl_node.get_path(array_suffix="", empty_array_suffix="")
             heading = nodes.section()
             heading.attributes["ids"] = [ref_id]
+            # TODO: Include RDL name in title if it was set.
             heading.append(nodes.title(text=rdl_node.inst_name))
             heading.extend(doc_nodes)
             doc_nodes = [heading]

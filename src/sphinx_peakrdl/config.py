@@ -31,7 +31,7 @@ def setup_config(app: "Sphinx") -> None:
     app.add_config_value("peakrdl_html_extra_doc_properties", [], "env", [list])
 
     # Inline doc settings
-    app.add_config_value("peakrdl_doc_add_heading", True, "env", [bool])
+    app.add_config_value("peakrdl_doc_wrap_section", True, "env", [bool])
 
 
 def elaborate_config_callback(app: "Sphinx", cfg: "Config") -> None:

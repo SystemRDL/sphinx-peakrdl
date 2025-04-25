@@ -1,0 +1,8 @@
+addrmap my_soc {
+    desc = "
+    This is an example SoC that has three very high-tech peripherals.
+    ";
+    thingamabob thingamabob @ 0x1000;
+    uart uart @ 0x2000;
+    turbo_encab turboencabulator @ 0x10000;
+};

@@ -1,0 +1,48 @@
+addrmap thingamabob {
+    reg {
+        default sw = rw;
+        default hw = r;
+
+        desc = "Control register for the thingamabob peripheral";
+
+        field {
+            desc = "
+            Rate (in Hz) that the thingamabob bobs.
+
+            !!! note
+                Setting the bobbing rate beyond `11` may cause the thingamabob
+                to fail catastrophically.
+            ";
+
+        } bobbing_rate[15:8] = 12;
+
+        field {
+            sw=w;
+            singlepulse;
+            desc = "
+            Soft reset.
+
+            This always reads as 0";
+        } srst[1:1] = 0;
+        field {} en[0:0] = 0;
+    } ctrl;
+
+    reg {
+        default sw = r;
+        default hw = w;
+
+        desc = "
+        Status register for the thingamabob.
+
+        If any critical failure is observed, do the following:
+        * Don't panic.
+        * Issue a soft reset.
+        * Try turning it off and on.
+        * If the situation does not resolve, panic.
+        ";
+
+        field {} critical_internal_fault;
+        field {} critical_bobbing_failure;
+        field {} idle;
+    } status;
+};

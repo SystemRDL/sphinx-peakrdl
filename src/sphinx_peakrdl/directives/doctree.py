@@ -32,7 +32,7 @@ class RDLDocTreeDirective(RDLDocNodeDirective):
             return []
 
         # Always add headings
-        self.options["add-heading"] = True
+        self.options["wrap-section"] = True
 
         return [self.make_rdl_node_doctree(rdl_node)]
 
@@ -41,7 +41,7 @@ class RDLDocTreeDirective(RDLDocNodeDirective):
         result = self.make_rdl_node_doc(rdl_node)
 
         # result is guaranteed to be 1 element that is the <section> node
-        # due to add-heading forced to True
+        # due to wrap-section forced to True
         assert len(result) == 1
         content = result[0]
 
