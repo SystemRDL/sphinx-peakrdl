@@ -35,6 +35,7 @@ addrmap thingamabob {
         Status register for the thingamabob.
 
         If any critical failure is observed, do the following:
+
         * Don't panic.
         * Issue a soft reset.
         * Try turning it off and on.

@@ -14,8 +14,6 @@ Using this extension, you can:
 Get Started
 -----------
 
-TODO: Add disclaimer banner to docs - help wanted!
-
 Install
 ~~~~~~~
 Install from `PyPi`_ using pip
