@@ -1,29 +1,15 @@
 Cross-references
 ================
 
+PeakRDL cross-references allow you to insert links into your documentation that
+point to specific register model nodes. These are very useful in programming
+guides, or more long-form prose in documentation.
+
+Cross-references can link to inline register reference content, or dynamic HTML content.
+
+
 .. role:: code-rst(code)
    :language: reStructuredText
-
-.. rst:directive:: .. rdl:relative-to:: path
-
-    It can be cumbersome to always specify the full register hierarchy in your docs.
-    This directive lets you temporarily set a more localized scope to a hierarchy
-    to make following references in the same document easier to manage.
-
-    .. code-block:: rst
-
-        Annoying! :rdl:ref:`very.long.path.to.my_block.my_register`
-
-        .. rdl:relative-to:: very.long.path.to
-
-        Much better! :rdl:ref:`my_block.my_register`
-
-
-    Cross-references will first search relative to the path specified, then
-    fall back to searching the absolute path.
-
-
-
 
 
 .. rst:role:: rdl:ref
@@ -46,7 +32,27 @@ Cross-references
     Same as the :rst:role:`rdl:ref` role, except this will prefer linking to
     PeakRDL-HTML reference, regardless of the :confval:`peakrdl_default_link_to` setting.
 
+
 .. rst:role:: rdl:doc-ref
 
     Same as the :rst:role:`rdl:ref` role, except this will prefer linking to
     an inline :rst:dir:`docnode`, regardless of the :confval:`peakrdl_default_link_to` setting.
+
+
+.. rst:directive:: .. rdl:relative-to:: path
+
+    It can be cumbersome to always specify the full register hierarchy in your docs.
+    This directive lets you temporarily set a more localized scope to a hierarchy
+    to make following references in the same document easier to manage.
+
+    .. code-block:: rst
+
+        Annoying! :rdl:ref:`very.long.path.to.my_block.my_register`
+
+        .. rdl:relative-to:: very.long.path.to
+
+        Much better! :rdl:ref:`my_block.my_register`
+
+
+    Cross-references will first search relative to the path specified, then
+    fall back to searching the absolute path.

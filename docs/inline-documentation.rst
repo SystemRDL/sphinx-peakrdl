@@ -1,6 +1,13 @@
 Inline Documentation
 ====================
 
+Register reference can be inserted inline into any reStructuredText document
+using the directives described in this page.
+Inline register reference is useful if you do not want to rely on the dynamic
+HTML-generated register reference, and instead want to have all the register
+reference be included within the Sphinx-doc project. This is especially useful
+if the desired output is PDF.
+
 .. rst:directive:: .. rdl:docnode:: path
 
     Inserts the full documentation for the register model node referenced by ``path``.
@@ -15,7 +22,9 @@ Inline Documentation
 
     .. rst:directive:option:: no-wrap-section:
 
-        If set, suppresses creation of a section heading.
+        If set, suppresses creation of a section heading. This is useful if you
+        want to provide your own section heading fot this docnode.
+
         If this option is not specified, behavior is determined by the
         :confval:`peakrdl_doc_wrap_section` setting.
 

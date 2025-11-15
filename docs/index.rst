@@ -53,7 +53,7 @@ Start cross-referencing!
 ~~~~~~~~~~~~~~~~~~~~~~~~
 Cross-reference your documentation to automatically-generated PeakRDL-HTML pages.
 
-This really useful when writing software guides or other reference pages. For example:
+This is really useful when writing software guides or other reference pages. For example:
 
 .. code-block:: rst
 
