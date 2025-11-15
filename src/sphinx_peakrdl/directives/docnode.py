@@ -96,7 +96,7 @@ class RDLDocNodeDirective(SphinxDirective):
         """
         desc = rdl_node.get_property("desc") or ""
 
-        src_ref = rdl_node.inst.property_src_ref.get("desc", rdl_node.inst.inst_src_ref)
+        src_ref = rdl_node.property_src_ref.get("desc", rdl_node.inst_src_ref)
         if isinstance(src_ref, FileSourceRef):
             path = src_ref.path
         else:
@@ -190,7 +190,7 @@ class RDLDocNodeDirective(SphinxDirective):
         else:
             logger.warning(
                 "Cannot generate doc content for %s components: %s",
-                type(rdl_node.inst).__name__.lower(),
+                rdl_node.component_type_name,
                 self.target,
                 location=self.get_location(),
             )
