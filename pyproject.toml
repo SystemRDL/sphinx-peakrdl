@@ -12,6 +12,7 @@ dependencies = [
     "peakrdl-html ~= 2.11",
     "sphinx >= 1.8",
     "myst-parser >= 1.0",
+    "sphinxcontrib-yowasp-wavedrom",
 ]
 
 authors = [
