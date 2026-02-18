@@ -1,5 +1,7 @@
 from typing import Sequence, Optional, List, Tuple
 
+import json
+
 from sphinx.domains import Domain
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util import logging
@@ -7,12 +9,14 @@ from sphinx import addnodes
 
 from docutils import nodes
 from docutils.parsers.rst import directives
+from docutils.statemachine import StringList
 
 from systemrdl.node import Node, RegNode, AddressableNode, SignalNode, RootNode
 from systemrdl.rdltypes.references import PropertyReference
 from systemrdl.source_ref import FileSourceRef, DetailedFileSourceRef
 
 from ..utils import lookup_rdl_node, FieldList, Table, alpha_from_int
+from ..wavedrom import register_to_wavedrom
 
 from ..markdown.render import render_to_docutils
 
@@ -200,8 +204,8 @@ class RDLDocNodeDirective(SphinxDirective):
             ref_id = rdl_node.get_path(array_suffix="", empty_array_suffix="")
             heading = nodes.section()
             heading.attributes["ids"] = [ref_id]
-            # TODO: Include RDL name in title if it was set.
-            heading.append(nodes.title(text=rdl_node.inst_name))
+            display_name = rdl_node.get_property("name") or rdl_node.inst_name
+            heading.append(nodes.title(text=display_name))
             heading.extend(doc_nodes)
             doc_nodes = [heading]
 
@@ -210,12 +214,69 @@ class RDLDocNodeDirective(SphinxDirective):
         return doc_nodes
 
 
+    def _build_wavedrom_node(self, rdl_node: RegNode) -> nodes.container:
+        """Build a WaveDrom bitfield diagram via nested RST parsing."""
+        wavedrom_dict = register_to_wavedrom(rdl_node)
+        wavedrom_json = json.dumps(wavedrom_dict)
+
+        rst = StringList()
+        path = rdl_node.get_path(array_suffix="", empty_array_suffix="")
+        image_name = f"regblock_{path.replace('.', '_')}"
+        rst.append(f".. wavedrom:: {image_name}", "<peakrdl>")
+        rst.append("", "<peakrdl>")
+        for line in wavedrom_json.splitlines():
+            rst.append(f"   {line}", "<peakrdl>")
+        rst.append("", "<peakrdl>")
+
+        container = nodes.container(classes=["peakrdl-bitfield"])
+        self.state.nested_parse(rst, 0, container)
+        return container
+
+    def _build_field_def_list(self, rdl_node: RegNode) -> list[nodes.Element]:
+        """Build field descriptions as a definition list (compact style)."""
+        def_list = nodes.definition_list()
+        for field in reversed(rdl_node.fields()):
+            desc = field.get_property("desc")
+            if not desc:
+                continue
+
+            dli = nodes.definition_list_item()
+            def_list.append(dli)
+
+            dl_term = nodes.term(text=field.inst_name)
+            dl_def = nodes.definition()
+            dl_def_p = self.get_rdl_desc(field)
+            dl_def.append(dl_def_p)
+
+            dli.append(dl_term)
+            dli.append(dl_def)
+        return [def_list]
+
+    def _build_field_sections(self, rdl_node: RegNode) -> list[nodes.Element]:
+        """Build field descriptions as individual sections with headings."""
+        sections: list[nodes.Element] = []
+        for field in reversed(rdl_node.fields()):
+            desc = field.get_property("desc")
+            if not desc:
+                continue
+
+            path = field.get_path(array_suffix="", empty_array_suffix="")
+            section_id = nodes.make_id(path)
+            section = nodes.section(ids=[section_id])
+            section += nodes.title(text=field.inst_name)
+            section += self.get_rdl_desc(field)
+            sections.append(section)
+        return sections
+
     def make_rdl_reg_doc(self, rdl_node: RegNode) -> Sequence[nodes.Element]:
         # Info Field List Header
         fl = self.get_info_header(rdl_node)
 
         # Description
         desc_paragraph = self.get_rdl_desc(rdl_node)
+
+        # WaveDrom bitfield diagram
+        wavedrom_node = self._build_wavedrom_node(rdl_node)
 
         # Field Table
         table = Table(["Bits", "Identifier", "Access", "Reset", "Name"])
@@ -255,24 +316,12 @@ class RDLDocNodeDirective(SphinxDirective):
             ])
 
         # Field descriptions
-        def_list = nodes.definition_list()
-        for field in reversed(rdl_node.fields()):
-            desc = field.get_property("desc")
-            if not desc:
-                continue
+        if self.config.peakrdl_doc_field_sections:
+            field_descs = self._build_field_sections(rdl_node)
+        else:
+            field_descs = self._build_field_def_list(rdl_node)
 
-            dli = nodes.definition_list_item()
-            def_list.append(dli)
-
-            dl_term = nodes.term(text = field.inst_name)
-            dl_def = nodes.definition()
-            dl_def_p = self.get_rdl_desc(field)
-            dl_def.append(dl_def_p)
-
-            dli.append(dl_term)
-            dli.append(dl_def)
-
-        return [fl, desc_paragraph, table.as_node(), def_list]
+        return [fl, desc_paragraph, wavedrom_node, table.as_node(), *field_descs]
 
 
     def make_rdl_grouplike_doc(self, rdl_node: AddressableNode) -> Sequence[nodes.Element]:
