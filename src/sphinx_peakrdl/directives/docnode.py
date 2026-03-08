@@ -200,8 +200,7 @@ class RDLDocNodeDirective(SphinxDirective):
             ref_id = rdl_node.get_path(array_suffix="", empty_array_suffix="")
             heading = nodes.section()
             heading.attributes["ids"] = [ref_id]
-            # TODO: Include RDL name in title if it was set.
-            heading.append(nodes.title(text=rdl_node.inst_name))
+            heading.append(nodes.title(text=rdl_node.get_property("name")))
             heading.extend(doc_nodes)
             doc_nodes = [heading]
 
