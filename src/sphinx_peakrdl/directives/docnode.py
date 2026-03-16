@@ -9,6 +9,7 @@ from docutils import nodes
 from docutils.parsers.rst import directives
 
 from systemrdl.node import Node, RegNode, AddressableNode, SignalNode, RootNode
+from systemrdl.rdltypes import UserEnum
 from systemrdl.rdltypes.references import PropertyReference
 from systemrdl.source_ref import FileSourceRef, DetailedFileSourceRef
 
@@ -209,6 +210,17 @@ class RDLDocNodeDirective(SphinxDirective):
         return doc_nodes
 
 
+    def _build_enum_table(self, enum_cls: type) -> nodes.table:
+        """Build a table of enum members showing value, name, and description."""
+        table = Table(["Value", "Name", "Description"])
+        for member in enum_cls:
+            table.add_row([
+                f"{member.value:#x}",
+                member.name,
+                member.rdl_desc or "-",
+            ])
+        return table.as_node()
+
     def make_rdl_reg_doc(self, rdl_node: RegNode) -> Sequence[nodes.Element]:
         # Info Field List Header
         fl = self.get_info_header(rdl_node)
@@ -216,8 +228,16 @@ class RDLDocNodeDirective(SphinxDirective):
         # Description
         desc_paragraph = self.get_rdl_desc(rdl_node)
 
+        # Check if any field uses an enum encoding
+        has_enums = any(
+            field.get_property("encode") for field in rdl_node.fields()
+        )
+
         # Field Table
-        table = Table(["Bits", "Identifier", "Access", "Reset", "Name"])
+        headings = ["Bits", "Identifier", "Access", "Reset", "Name"]
+        if has_enums:
+            headings.append("Encode")
+        table = Table(headings)
         for field in reversed(rdl_node.fields()):
             # Is actual field
             if field.width == 1:
@@ -245,13 +265,19 @@ class RDLDocNodeDirective(SphinxDirective):
             else:
                 reset = self.get_rdl_xref(reset_value)
 
-            table.add_row([
+            row = [
                 bitrange,
                 field.inst_name,
                 access,
                 reset,
                 field.get_property("name", default="-"),
-            ])
+            ]
+            if has_enums:
+                encode = field.get_property("encode")
+                encode_name = encode.type_name if encode and issubclass(encode, UserEnum) else "-"
+                row.append(encode_name)
+
+            table.add_row(row)
 
         # Field descriptions
         def_list = nodes.definition_list()
@@ -259,14 +285,18 @@ class RDLDocNodeDirective(SphinxDirective):
             desc = field.get_property("desc")
             if not desc:
                 continue
+            encode = field.get_property("encode")
 
             dli = nodes.definition_list_item()
             def_list.append(dli)
 
             dl_term = nodes.term(text = field.inst_name)
             dl_def = nodes.definition()
-            dl_def_p = self.get_rdl_desc(field)
-            dl_def.append(dl_def_p)
+            if desc:
+                dl_def_p = self.get_rdl_desc(field)
+                dl_def.append(dl_def_p)
+            if encode and issubclass(encode, UserEnum):
+                dl_def.append(self._build_enum_table(encode))
 
             dli.append(dl_term)
             dli.append(dl_def)
