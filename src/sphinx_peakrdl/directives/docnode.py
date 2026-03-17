@@ -260,7 +260,10 @@ class RDLDocNodeDirective(SphinxDirective):
             if not desc:
                 continue
 
+            field_ref_id = field.get_path(array_suffix="", empty_array_suffix="")
+
             dli = nodes.definition_list_item()
+            dli["ids"] = [field_ref_id]
             def_list.append(dli)
 
             dl_term = nodes.term(text = field.inst_name)
@@ -270,6 +273,9 @@ class RDLDocNodeDirective(SphinxDirective):
 
             dli.append(dl_term)
             dli.append(dl_def)
+
+            # Register field as a linkable docnode
+            self.domain.data["rdl_docnodes"][field_ref_id] = self.env.docname
 
         return [fl, desc_paragraph, table.as_node(), def_list]
 
