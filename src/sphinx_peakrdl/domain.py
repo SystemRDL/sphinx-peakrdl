@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Set, Dict, Any
 
 from docutils.nodes import Element
 from sphinx.domains import Domain
@@ -33,6 +33,11 @@ class PeakRDLDomain(Domain):
         # rdl_path --> docname
         "rdl_docnodes": {}
     }
+
+    def merge_domaindata(self, docnames: Set[str], otherdata: Dict[str, Any]) -> None:
+        for rdl_path, docname in otherdata["rdl_docnodes"].items():
+            if docname in docnames:
+                self.data["rdl_docnodes"][rdl_path] = docname
 
     def html_is_available(self, builder_name: str) -> bool:
         """
